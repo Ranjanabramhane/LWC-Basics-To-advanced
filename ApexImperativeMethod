@@ -1,0 +1,86 @@
+------@Apex Class@----
+
+public with sharing class ContactController {
+@AuraEnabled(cacheable=true)
+    public static list<contact> getContactList(){
+       
+        return [
+            SELECT
+                Id,
+                Name,
+                FirstName,
+                LastName,
+                Title,
+                Phone,
+                Email              
+            FROM Contact
+            LIMIT 10
+        ]; 
+    }
+}
+
+
+
+----------@apexImperativeMethod.html@------------------------
+<template>
+<lightning-card title="ApexImperativeMethod" icon-name="custom:custom63">
+    <div class="slds-var-m-around_medium">
+        <p class="slds-var-m-bottom_small">
+                <lightning-button
+                variant="brand"
+                    label="Load Contacts"
+                    onclick={handleLoad}
+                ></lightning-button>
+        </p>
+        <template lwc:if={contacts}>
+            <div style="height: 500px;">
+        <template if:true={contacts}>
+         <div class="slds-box">
+        <lightning-datatable
+            key-field="id"
+            data={contacts}
+            columns={columns}>
+        </lightning-datatable>
+        </div>
+        </template>
+        </div>
+        </template>
+    </div>
+</lightning-card>
+</template>
+
+------------@apexImperativeMethod.js@-----------------------------------
+import { LightningElement, track } from 'lwc';
+import getContactList from '@salesforce/apex/ContactController.getContactList';
+export default class ApexImperativeMethod extends LightningElement {
+@track columns = [
+          { label: 'Name', fieldName: 'Name' },
+          { label: 'Phone', fieldName: 'Phone'}
+      ];
+@track contacts;
+error;
+
+ handleLoad(){
+    getContactList()
+    .then((result)=>{
+this.contacts = result;
+this.error = undefined;
+    })
+    .catch((error)=>{
+        this.contacts = undefined;
+        this.error = error;
+    })
+    }
+}
+----------------------------@apexImperativeMethod.js-meta.xml@---------------------------------------
+<?xml version="1.0"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+	<apiVersion>57.0</apiVersion>
+	<isExposed>true</isExposed>
+	<targets>
+		<target>lightning__RecordPage</target>
+		<target>lightning__AppPage</target>
+		<target>lightning__HomePage</target>
+	</targets>
+</LightningComponentBundle>
+
